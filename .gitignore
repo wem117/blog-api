@@ -1,6 +1,24 @@
-# Created by venv; see https://docs.python.org/3/library/venv.html
-*__pychase__
-venv/
-.env
-
+# Django
+*.log
+*.sqlite3
 db.sqlite3
+db_prod.sqlite3
+
+# Env
+settings/.env
+.env
+env/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Media/Static
+media/
+static/
+
+# OS
+.DS_Store
