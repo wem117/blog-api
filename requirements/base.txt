@@ -5,3 +5,8 @@ Pillow
 redis>=5.0.0
 django-redis>=5.4.0
 python-decouple
+drf-spectacular
+httpx
+django-modeltranslation
+pytz
+django-timezone-field

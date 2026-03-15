@@ -19,6 +19,7 @@ __pycache__/
 # Media/Static
 media/
 static/
+staticfiles/
 
 # OS
 .DS_Store

@@ -8,6 +8,7 @@ DEBUG = BLOG_DEBUG
 ALLOWED_HOSTS = BLOG_ALLOWED_HOSTS
 
 INSTALLED_APPS = [
+    'modeltranslation',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -19,6 +20,8 @@ INSTALLED_APPS = [
     'apps.users',
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_spectacular',
+
 ]
 
 MIDDLEWARE = [
@@ -29,6 +32,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'apps.middleware.UserLangMiddleware',
+
 ]
 
 ROOT_URLCONF = 'settings.urls' 
@@ -56,6 +62,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 LOGGING = {
     'version': 1,
@@ -101,7 +114,20 @@ REST_FRAMEWORK = {
         'post_create': '20/minute',
     },
     'EXCEPTION_HANDLER': 'apps.blog.views.minimal_429_handler',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Blog',
+    'DESCRIPTION': 'Local & Async API.',
+
+    'VERSION': '2.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_PATCH': True,
+    'COMPONENT_SPLIT_REQUEST': True,
+}
+
 
 CACHES = {
     "default": {
@@ -113,11 +139,22 @@ CACHES = {
     }
 }
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
+LANGUAGES = [
+    ('en', 'English'),
+    ('ru', 'Russian'),
+    ('kk', 'Kazakh'),
+]
+LOCALE_PATHS = [BASE_DIR / 'locale']
 TIME_ZONE = 'UTC'
 USE_I18N = True
+USE_L10N = True
 USE_TZ = True
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'

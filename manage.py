@@ -4,17 +4,7 @@ import sys
 from pathlib import Path
 
 def main():
-    # Load BLOG_ENV_ID from settings/.env
-    env_path = Path(__file__).resolve().parent / 'settings' / '.env'
-    env_id = 'local'
-    if env_path.exists():
-        with open(env_path) as f:
-            for line in f:
-                if line.startswith('BLOG_ENV_ID='):
-                    env_id = line.split('=')[1].strip()
-                    break
-
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', f'settings.env.{env_id}')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings.base')
     
     try:
         from django.core.management import execute_from_command_line
