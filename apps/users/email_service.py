@@ -6,8 +6,8 @@ def send_welcome_email(user):
     lang = user.preferred_language or 'en'
     
     with translation.override(lang):
-        subject = 'Welcome to Blog!'
-        html_message = render_to_string('emails/welcome.html', {'user': user})
+        subject = render_to_string('emails/welcome/subject.txt', {'user': user}).strip()
+        html_message = render_to_string('emails/welcome/body.html', {'user': user})
         
         send_mail(
             subject=subject,

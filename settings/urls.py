@@ -19,8 +19,8 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/auth/token/', LoggingTokenObtainPairView.as_view(), name='token_obtain'),
     path('api/auth/token/refresh/', DocumentedTokenRefreshView.as_view(), name='token_refresh'),
-    path('api/users/update-lang/', UpdateLangView.as_view(), name='update-lang'),
-    path('api/users/update-timezone/', UpdateTimeZoneView.as_view(), name='update-timezone'),
+    path('api/auth/language/', UpdateLangView.as_view(), name='update-lang'),
+    path('api/auth/timezone/', UpdateTimeZoneView.as_view(), name='update-timezone'),
     path('api/stats/', StatsView.as_view(), name='stats'),
     
     # Documentation

@@ -13,7 +13,8 @@ from rest_framework.views import exception_handler
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
 from drf_spectacular.types import OpenApiTypes
 
-from .models import Post
+from .models import Post, Comment
+from apps.users.models import User
 from .serializer import PostSerializer, CommentSerializer
 from .permission import IsAuthorOrReadOnly
 import httpx
@@ -131,7 +132,12 @@ class PostViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save(author=request.user, post=post)
             
-            get_redis_connection("default").publish('comments', json.dumps(serializer.data))
+            comment_data = {
+                "post_slug": post.slug,
+                "author_id": request.user.id,
+                "body": serializer.data.get("body")
+            }
+            get_redis_connection("default").publish('comments', json.dumps(comment_data))
             
             logger.info('Comment added to post %s by %s', post.slug, request.user.email)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -139,36 +145,54 @@ class PostViewSet(viewsets.ModelViewSet):
 class StatsView(APIView):
     permission_classes = [permissions.AllowAny]
 
-    async def fetch_external_data(self, client):
+    async def get_exchange_rates(self, client):
         try:
-            response = await client.get("https://api.github.com/zen", timeout=5.0)
-            return response.text
+            resp = await client.get("https://open.er-api.com/v6/latest/USD", timeout=5.0)
+            data = resp.json()
+            rates = data.get("rates", {})
+            return {
+                "KZT": rates.get("KZT"),
+                "RUB": rates.get("RUB"),
+                "EUR": rates.get("EUR")
+            }
         except Exception:
-            return "Keep it simple."
+            return {"KZT": None, "RUB": None, "EUR": None}
+
+    async def get_almaty_time(self, client):
+        try:
+            resp = await client.get("https://timeapi.io/api/time/current/zone?timeZone=Asia/Almaty", timeout=5.0)
+            data = resp.json()
+            return data.get("dateTime")
+        except Exception:
+            return None
 
     @extend_schema(
         summary="Stats",
-        description="Post/comm counts + github zen.",
+        description="Blog counts + exchange rates + Almaty time.",
         tags=['Stats'],
-        responses={200: OpenApiTypes.OBJECT},
-        examples=[
-            OpenApiExample('Stats', value={
-                'posts_count': 10,
-                'comments_count': 50,
-                'external_message': 'Zen'
-            })
-        ]
+        responses={200: OpenApiTypes.OBJECT}
     )
+    async def async_get(self, request):
+        total_posts = await asyncio.to_thread(Post.objects.count)
+        total_comments = await asyncio.to_thread(Comment.objects.count)
+        total_users = await asyncio.to_thread(User.objects.count)
 
-    async def get(self, request):
-        posts_count = await asyncio.to_thread(Post.objects.count)
-        comments_count = await asyncio.to_thread(Post.objects.filter(status='published').count) # Just an example
-        
         async with httpx.AsyncClient() as client:
-            external_message = await self.fetch_external_data(client)
+            rates, almaty_time = await asyncio.gather(
+                self.get_exchange_rates(client),
+                self.get_almaty_time(client)
+            )
 
-        return Response({
-            'posts_count': posts_count,
-            'comments_count': comments_count,
-            'external_message': external_message
-        })
+        return {
+            "blog": {
+                "total_posts": total_posts,
+                "total_comments": total_comments,
+                "total_users": total_users
+            },
+            "exchange_rates": rates,
+            "current_time": almaty_time
+        }
+
+    def get(self, request):
+        data = asyncio.run(self.async_get(request))
+        return Response(data)

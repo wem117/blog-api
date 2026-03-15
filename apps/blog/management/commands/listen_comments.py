@@ -21,7 +21,8 @@ class Command(BaseCommand):
             async for message in pubsub.listen():
                 if message['type'] == 'message':
                     data = json.loads(message['data'])
-                    self.stdout.write(self.style.NOTICE(f"New comment: {data.get('body')} by {data.get('author')}"))
+                    msg = f"New comment on '{data.get('post_slug')}' by User {data.get('author_id')}: {data.get('body')}"
+                    self.stdout.write(self.style.NOTICE(msg))
         except asyncio.CancelledError:
             await pubsub.unsubscribe("comments")
             await r.close()

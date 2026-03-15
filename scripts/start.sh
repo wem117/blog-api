@@ -8,7 +8,11 @@ VENV="venv"
 PY="./$VENV/bin/python"
 PIP="./$VENV/bin/pip"
 
+echo "Cleaning up port 8000..."
+lsof -t -i:8000 | xargs kill -9 2>/dev/null || true
+
 echo "Starting Blog API..."
+
 
 # 1. Check .env
 if [ ! -f ".env" ]; then
