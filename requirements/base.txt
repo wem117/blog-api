@@ -1,0 +1,16 @@
+Django>=6.0.3
+djangorestframework>=3.16.1
+djangorestframework-simplejwt
+django-modeltranslation
+django-timezone-field
+django-redis
+redis
+httpx
+drf-spectacular
+psycopg2-binary
+python-dotenv
+daphne>=4.0.0
+channels>=4.0.0
+channels-redis>=4.0.0
+python-decouple
+dj-database-url

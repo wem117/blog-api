@@ -1,0 +1,26 @@
+# Django
+*.log
+*.sqlite3
+db.sqlite3
+db_prod.sqlite3
+
+# Env
+settings/.env
+.env
+env/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.mo
+
+# Media/Static
+media/
+static/
+staticfiles/
+
+# OS
+.DS_Store
